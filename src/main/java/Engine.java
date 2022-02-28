@@ -10,13 +10,12 @@ import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
-import java.util.TreeSet;
 
 public class Engine implements Runnable {
 
     private final EntityManager entityManager;
 
-    private BufferedReader bufferedReader;
+    private final BufferedReader bufferedReader;
 
     public Engine(EntityManager entityManager) {
         this.entityManager = entityManager;
@@ -40,6 +39,8 @@ public class Engine implements Runnable {
                 case 7 -> exerciseSeven();
                 case 8 -> exerciseEight();
                 case 9 -> exerciseNine();
+                case 10 -> exerciseTen();
+                case 11 -> exerciseEleven();
 
             }
         } catch (IOException e) {
@@ -49,8 +50,29 @@ public class Engine implements Runnable {
         }
     }
 
+
+    private void exerciseEleven() throws IOException {
+        System.out.println("Please enter first name pattern:");
+        String n_like = bufferedReader.readLine() + "%";
+        List<Employee> employeeList = entityManager.createQuery("select e FROM Employee e where e.firstName like :n_like", Employee.class)
+                .setParameter("n_like", n_like)
+                .getResultList();
+        employeeList.forEach(employee ->
+                System.out.printf("%s %s - %s - (%.2f)%n", employee.getFirstName(), employee.getLastName(), employee.getDepartment().getName(), employee.getSalary()));
+    }
+
+    private void exerciseTen() {
+        entityManager.getTransaction().begin();
+        entityManager.createQuery("UPDATE Employee e SET e.salary = e.salary * 1.12 WHERE e.department.id in (1, 2, 4, 11)")
+                .executeUpdate();
+        entityManager.getTransaction().commit();
+        entityManager.createQuery("SELECT e FROM Employee e WHERE e.department.id in (1, 2, 4, 11)", Employee.class)
+                        .getResultList().forEach(employee -> System.out.printf("%s %s (%.2f)%n", employee.getFirstName(), employee.getLastName(), employee.getSalary()));
+    }
+
+
     private void exerciseNine() {
-     entityManager.createQuery("FROM Project p ORDER BY p.startDate DESC", Project.class)
+        entityManager.createQuery("SELECT p FROM Project p ORDER BY p.startDate DESC", Project.class)
                 .setMaxResults(10)
                 .getResultStream()
                 .sorted(Comparator.comparing(Project::getName))
@@ -62,6 +84,7 @@ public class Engine implements Runnable {
                 });
 
     }
+
 
     private void exerciseEight() throws IOException {
         System.out.println("Enter employee id:");
@@ -76,24 +99,22 @@ public class Engine implements Runnable {
         employee.getProjects()
                 .stream()
                 .sorted(Comparator.comparing(Project::getName))
-                .forEach(project -> {
-                    System.out.println("\t" + project.getName());
-                });
+                .forEach(project -> System.out.println("\t" + project.getName()));
     }
+
 
     private void exerciseSeven() {
         List<Address> addresses = entityManager
                 .createQuery("SELECT a FROM Address a ORDER BY a.employees.size DESC", Address.class)
                 .setMaxResults(10)
                 .getResultList();
-        addresses.forEach(address -> {
-            System.out.printf("%s, %s - %d employees%n",
-                    address.getText(),
-                    address.getTown() == null
-                            ? "Unknown" : address.getTown().getName(),
-                    address.getEmployees().size());
-        });
+        addresses.forEach(address -> System.out.printf("%s, %s - %d employees%n",
+                address.getText(),
+                address.getTown() == null
+                        ? "Unknown" : address.getTown().getName(),
+                address.getEmployees().size()));
     }
+
 
     private void exerciseSix() throws IOException {
         System.out.println("Enter employee's last name:");
@@ -115,6 +136,7 @@ public class Engine implements Runnable {
 
     }
 
+
     private Address createAddress(String addressText) {
         //Създаваме обект от клас адрес
         Address address = new Address();
@@ -127,6 +149,7 @@ public class Engine implements Runnable {
         return address;
     }
 
+
     private void exerciseFive() {
         List<Employee> employeeList = entityManager
                 .createQuery("SELECT e FROM Employee e " +
@@ -135,16 +158,15 @@ public class Engine implements Runnable {
                 .setParameter("d_name", "Research and Development")
                 .getResultList();
 
-            employeeList.forEach(employee -> {
-                System.out.printf("%s %s from %s - $%.2f%n",
-                        employee.getFirstName(),
-                        employee.getLastName(),
-                        //Обекта Емплои в Джава има достъп и до останалата информация
-                        //от навързаните ентитита (в случая департмент)
-                        employee.getDepartment().getName(),
-                        employee.getSalary());
-            });
+        employeeList.forEach(employee -> System.out.printf("%s %s from %s - $%.2f%n",
+                employee.getFirstName(),
+                employee.getLastName(),
+                //Обекта Емплои в Джава има достъп и до останалата информация
+                //от навързаните ентитита (в случая департмент)
+                employee.getDepartment().getName(),
+                employee.getSalary()));
     }
+
 
     private void exerciseFour() throws IOException {
         System.out.println("Enter minimum salary for the list:");
@@ -163,6 +185,7 @@ public class Engine implements Runnable {
 
     }
 
+
     private void exerciseThree() throws IOException {
         System.out.println("Enter Full name:");
         String[] fullName = bufferedReader.readLine().split("\\s+");
@@ -180,6 +203,7 @@ public class Engine implements Runnable {
         System.out.println(singleResult == 0
                 ? "No" : "Yes");
     }
+
 
     private void exerciseTwo() {
         entityManager.getTransaction().begin();
