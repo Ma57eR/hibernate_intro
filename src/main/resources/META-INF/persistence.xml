@@ -8,13 +8,13 @@
     <persistence-unit name="softuni">
         <properties>
             <property name="hibernate.connection.url"
-                      value="jdbc:mysql://5.tcp.eu.ngrok.io:18528/soft_uni?createDatabaseIfNotExist=true&amp;useSSL=false&amp;serverTimezone=UTC"/>
+                      value="jdbc:mysql://5.tcp.eu.ngrok.io:18641/soft_uni?createDatabaseIfNotExist=true&amp;useSSL=false&amp;serverTimezone=UTC"/>
             <property name="hibernate.connection.driver_class" value="com.mysql.cj.jdbc.Driver"/>
             <property name="hibernate.connection.username" value="root"/>
             <property name="hibernate.connection.password" value="11111111"/>
             <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
-            <property name="hibernate.show_sql" value="true"/>
-            <property name="hibernate.format_sql" value="true"/>
+<!--            <property name="hibernate.show_sql" value="true"/>-->
+<!--            <property name="hibernate.format_sql" value="true"/>-->
             <property name="hibernate.hbm2ddl.auto" value="update"/>
         </properties>
     </persistence-unit>
