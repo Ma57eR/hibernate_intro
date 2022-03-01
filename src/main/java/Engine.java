@@ -1,6 +1,7 @@
 import entities.Address;
 import entities.Employee;
 import entities.Project;
+import entities.Town;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -41,6 +42,8 @@ public class Engine implements Runnable {
                 case 9 -> exerciseNine();
                 case 10 -> exerciseTen();
                 case 11 -> exerciseEleven();
+                case 12 -> exerciseTwelve();
+                case 13 -> exerciseThirteen();
 
             }
         } catch (IOException e) {
@@ -48,6 +51,63 @@ public class Engine implements Runnable {
         } finally {
             entityManager.close();
         }
+    }
+
+
+    private void exerciseThirteen() throws IOException {
+        System.out.println("Enter town name:");
+        String townName = bufferedReader.readLine();
+
+        //Създаваме обект с търсения град от инпута
+        Town town = entityManager
+                .createQuery("SELECT t FROM Town t where t.name = :t_name", Town.class)
+                .setParameter("t_name", townName)
+                .getSingleResult();
+
+        //Създаваме списък с всички адреси, които са от града от инпута
+        List<Address> addresses = entityManager.createQuery("SELECT a from Address a WHERE a.town.id = :t_id", Address.class)
+                .setParameter("t_id", town.getId())
+                .getResultList();
+
+
+
+        entityManager.getTransaction().begin();
+        //Зануляваме TOWN_ID на всеки от адресите към града от входните данни
+        //Защото таблиците са релационно свързани
+        addresses.forEach(address -> address.setTown(null));
+        //Премахваме адресът
+        addresses.forEach(entityManager::remove);
+        entityManager.getTransaction().commit();
+
+        entityManager.getTransaction().begin();
+        //След като са премахнати всички адреси, вече можем
+        //да изтрием и самия град
+        entityManager.remove(town);
+        entityManager.getTransaction().commit();
+
+       //В зависимост дали премахнатите адреси са един или повече, ползваме различен стринг
+        String adr = addresses.size() == 1 ? "address" : "addresses";
+
+        System.out.printf("%d %s in %s deleted", addresses.size(), adr, townName);
+
+
+    }
+
+
+    @SuppressWarnings("unchecked")
+    private void exerciseTwelve() {
+        List<Object[]> rows = entityManager.createNativeQuery("select \n" +
+                "distinct\n" +
+                "d.name,\n" +
+                "MAX(e.salary)\n" +
+                "from employees e \n" +
+                "inner join departments d on d.department_id = e.department_id\n" +
+                "group by d.name\n" +
+                "having MAX(e.salary) not between 30000 and 70000")
+                .getResultList();
+
+        rows.forEach(objects ->
+                System.out.println(objects[0] + " " + objects[1]));
     }
 
 
